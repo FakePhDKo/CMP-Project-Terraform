@@ -40,6 +40,7 @@ module "rds" {
 module "ec2" {
   source            = "./modules/ec2"
   vpc_id            = module.vpc.vpc_id
+  vpc_cidr          = var.vpc_cidr
   public_subnet_id  = module.vpc.public_subnet_ids[0]
   private_subnet_ids = module.vpc.private_subnet_ids
 
@@ -50,4 +51,15 @@ module "ec2" {
   db_pass           = var.db_password
   db_user           = "adminuser" # 필요시 추가
   iam_instance_profile_name = "HybridServiceBrokerProfile"
+}
+
+module "beanstalk" {
+  source               = "./modules/beanstalk"
+  vpc_id               = module.vpc.vpc_id
+  private_subnets      = module.vpc.private_subnet_ids
+  public_subnets       = module.vpc.public_subnet_ids
+  service_name         = var.service_name
+  iam_instance_profile = module.ec2.iam_instance_profile_name
+  db_url               = "postgresql://${var.db_user}:${var.db_password}@${module.rds.db_endpoint}/hybrid_db"
+  elb_sg_id            = module.alb.alb_sg_id
 }

@@ -14,6 +14,11 @@ variable "onprem_public_ip" {
   description = "온프레미스 VPN 게이트웨이 공인 IP"
 }
 
+variable "db_user" {
+  description = "Database admin user"
+  type        = string
+}
+
 variable "db_password" {
   description = "Database administrator password"
   type        = string

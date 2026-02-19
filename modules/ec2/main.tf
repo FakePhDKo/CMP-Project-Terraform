@@ -1,3 +1,15 @@
+resource "aws_security_group" "eice_sg" {
+  name        = "${var.service_name}-eice-sg"
+  vpc_id      = var.vpc_id
+
+  egress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = [var.vpc_cidr] # VPC 내부로만 나감
+  }
+}
+
 resource "aws_security_group" "ec2_sg" {
   name   = "ec2-service-sg"
   vpc_id = var.vpc_id
@@ -15,7 +27,7 @@ resource "aws_security_group" "ec2_sg" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    security_groups = [aws_security_group.eice_sg.id]
   }
 
   # 아웃바운드 규칙 (모든 통신 허용)
@@ -56,6 +68,7 @@ resource "aws_autoscaling_group" "broker_asg" {
   desired_capacity    = 2 # 평소에 2대 유지
   max_size            = 4 # 부하 시 최대 4대
   min_size            = 1
+  
   vpc_zone_identifier = var.private_subnet_ids # 프라이빗 서브넷에 배치
 
   target_group_arns = [var.target_group_arn] # ALB와 연결
@@ -64,4 +77,10 @@ resource "aws_autoscaling_group" "broker_asg" {
     id      = aws_launch_template.broker_lt.id
     version = "$Latest"
   }
+}
+
+resource "aws_ec2_instance_connect_endpoint" "main" {
+  subnet_id          = var.private_subnet_ids[0]
+  security_group_ids = [aws_security_group.eice_sg.id]
+  tags = { Name = "${var.service_name}-eice" }
 }
