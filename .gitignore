@@ -1,0 +1,26 @@
+# .terraform 디렉토리 (프로바이더 플러그인 등 환경별 데이터가 들어있음)
+.terraform/
+
+# 테라폼 상태 파일 (가장 중요! 민감 정보 포함)
+*.tfstate
+*.tfstate.backup
+*.tfstate.lock.hcl
+
+# 변수 파일 (비밀번호, 키 등이 포함된 실제 설정값)
+# 우리는 tfvars에 비밀번호를 넣기로 했으니 반드시 무시해야 합니다.
+*.tfvars
+*.tfvars.json
+
+# 로그 파일
+crash.log
+crash.*.log
+
+# 로컬 설정 및 오버라이드 파일
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# 테라폼 CLI 환경 설정
+.terraformrc
+terraform.rc
